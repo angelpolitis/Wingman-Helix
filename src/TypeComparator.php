@@ -3,7 +3,7 @@
      * Project Name:    Wingman — Helix — Type Comparator
      * Created by:      Angel Politis
      * Creation Date:   Feb 17 2026
-     * Last Modified:   Feb 17 2026
+     * Last Modified:   Feb 19 2026
     /*/
 
     # Use the Helix namespace.
@@ -13,6 +13,7 @@
     use ReflectionIntersectionType;
     use ReflectionNamedType;
     use ReflectionType;
+    use ReflectionUnionType;
 
     /**
      * Checks that a method matches a specified signature.
@@ -84,6 +85,52 @@
 
             $separator = ($actualType instanceof ReflectionIntersectionType) ? '&' : '|';
             return static::compareTypes($expectedType, $actualNames, $target, $separator);
+        }
+
+        /**
+         * Converts a ReflectionType to a string representation.
+         * @param ReflectionType|null $type The reflection type to convert.
+         * @return string|null The string representation of the type, or `null` if the type is `null`.
+         */
+        public static function stringifyType (?ReflectionType $type) : ?string {
+            if ($type === null) {
+                return null;
+            }
+
+            if ($type instanceof ReflectionNamedType) {
+                $name = $type->getName();
+
+                if ($type->allowsNull() && $name !== "mixed") {
+                    return $name . "|null";
+                }
+
+                return $name;
+            }
+
+            if ($type instanceof ReflectionUnionType) {
+                $parts = [];
+                foreach ($type->getTypes() as $t) {
+                    $parts[] = $t->getName();
+                }
+
+                if ($type->allowsNull() && !in_array("null", $parts, true)) {
+                    $parts[] = "null";
+                }
+
+                return implode('|', $parts);
+            }
+
+            if ($type instanceof ReflectionIntersectionType) {
+                $parts = [];
+                foreach ($type->getTypes() as $t) {
+                    /** @var ReflectionNamedType $t */
+                    $parts[] = $t->getName();
+                }
+
+                return implode('&', $parts);
+            }
+
+            return null;
         }
     }
 ?>
