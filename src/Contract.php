@@ -3,13 +3,14 @@
      * Project Name:    Wingman — Helix — Contract
      * Created by:      Angel Politis
      * Creation Date:   Feb 16 2026
-     * Last Modified:   Feb 17 2026
+     * Last Modified:   Feb 19 2026
     /*/
 
     # Use the Helix namespace.
     namespace Wingman\Helix;
 
     # Import the following classes to the current scope.
+    use InvalidArgumentException;
     use Wingman\Helix\Exceptions\ContractViolationException;
 
     /**
@@ -95,6 +96,58 @@
         }
 
         /**
+         * Creates a contract based on an existing interface, using its methods, properties, and constants as terms.
+         * @param string $interface The name of the interface to create the contract from.
+         * @return static The created contract based on the interface.
+         * @throws InvalidArgumentException If the specified interface does not exist.
+         */
+        public static function fromInterface (string $interface) : static {
+            if (!interface_exists($interface)) {
+                throw new InvalidArgumentException("Interface '$interface' does not exist.");
+            }
+
+            $reflection = Inspector::getClassReflection($interface);
+            $contract = new static($interface);
+
+            foreach ($reflection->getConstants() as $name => $value) {
+                $contract->forConstant($name)
+                    ->expectValue($value)
+                    ->require();
+            }
+
+            foreach ($reflection->getMethods() as $method) {
+                $m = $contract->forMethod($method->getName())->require();
+
+                if ($method->hasReturnType()) {
+                    $m->expectReturnType(TypeComparator::stringifyType($method->getReturnType()));
+                }
+                
+                foreach ($method->getParameters() as $param) {
+                    $p = new Parameter(
+                        $param->getName(),
+                        $param->hasType() ? TypeComparator::stringifyType($param->getType()) : null,
+                        $param->isOptional(),
+                        $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null,
+                        $param->isVariadic(),
+                        $param->isPassedByReference()
+                    );
+
+                    $m->expectParameter($p);
+                }
+            }
+
+            foreach ($reflection->getProperties() as $property) {
+                $p = $contract->forProperty($property->getName())->require();
+                
+                if ($property->hasType()) {
+                    $p->expectType(TypeComparator::stringifyType($property->getType()));
+                }
+            }
+
+            return $contract;
+        }
+
+        /**
          * Gets all members of a contract.
          * @return Member[] An array of members that make up the contract.
          */
@@ -152,8 +205,20 @@
                 if (!$allErrors) break;
             }
             if (!empty($errors)) {
-                $name = is_object($objOrClass) ? get_class($objOrClass) : $objOrClass;
+                if (is_object($objOrClass)) {
+                    $ref = Inspector::getClassReflection($objOrClass);
+
+                    if ($ref->isAnonymous()) {
+                        $file = $ref->getFileName();
+                        $line = $ref->getStartLine();
+                        $name = "anonymous-class@{$file}:{$line}";
+                    }
+                    else $name = $ref->getName();
+                }
+                else $name = $objOrClass;
+
                 $errorString = $allErrors ? PHP_EOL . implode(PHP_EOL, $errors) . PHP_EOL : ' ' . $errors[0];
+
                 throw new ContractViolationException(
                     $this,
                     "Target '{$name}' violates contract '{$this->name}':$errorString"
