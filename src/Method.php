@@ -3,7 +3,7 @@
      * Project Name:    Wingman — Helix — Method
      * Created by:      Angel Politis
      * Creation Date:   Feb 16 2026
-     * Last Modified:   Feb 17 2026
+     * Last Modified:   Feb 19 2026
     /*/
 
     # Use the Helix namespace.
@@ -152,6 +152,36 @@
         }
 
         /**
+         * Expects a method to be abstract or non-abstract.
+         * @param bool $isAbstract Whether the method is expected to be abstract (true) or non-abstract (false).
+         * @return static The method.
+         */
+        public function expectAbstract (bool $isAbstract = true) : static {
+            $this->abstract = $isAbstract;
+            return $this;
+        }
+
+        /**
+         * Expects a specific access modifier for a method.
+         * @param AccessModifier|string $accessModifier The access modifier to expect (public, protected, private).
+         * @return static The method.
+         */
+        public function expectAccessModifier (AccessModifier|string $accessModifier) : static {
+            $this->accessModifier = AccessModifier::resolve($accessModifier);
+            return $this;
+        }
+
+        /**
+         * Expects a method to be final or non-final.
+         * @param bool $isFinal Whether the method is expected to be final (true) or non-final (false).
+         * @return static The method.
+         */
+        public function expectFinal (bool $isFinal = true) : static {
+            $this->final = $isFinal;
+            return $this;
+        }
+
+        /**
          * Expects a parameter for the method with various options.
          * @param string|Parameter $nameOrObject The name of the parameter or a Parameter object.
          * @param string|null $type The type of the parameter (optional).
@@ -174,6 +204,36 @@
                 return $this;
             }
             $this->parameters[] = new Parameter($nameOrObject, $type, $optional, $defaultValue, $passedByReference, $variadic);
+            return $this;
+        }
+
+        /**
+         * Expects a specific return type for the method.
+         * @param string|null $type The return type to expect (optional).
+         * @return static The method.
+         */
+        public function expectReturnType (?string $type) : static {
+            $this->type = $type;
+            return $this;
+        }
+
+        /**
+         * Expects a method to be static or non-static.
+         * @param bool $isStatic Whether the method is expected to be static (true) or non-static (false).
+         * @return static The method.
+         */
+        public function expectStatic (bool $isStatic = true) : static {
+            $this->static = $isStatic;
+            return $this;
+        }
+
+        /**
+         * Expects a specific return type for the method.
+         * @param string|null $type The return type to expect (optional).
+         * @return static The method.
+         */
+        public function expectType (?string $type) : static {
+            $this->type = $type;
             return $this;
         }
 
@@ -201,10 +261,6 @@
             return $this->getType();
         }
 
-        /**
-         * Generates a string representation of a method's signature, including modifiers, parameters, and return type.
-         * @return string The method signature as a string.
-         */
         /**
          * Generates a string representation of a method's signature.
          * @return string The method signature as a string.
