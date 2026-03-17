@@ -1,10 +1,14 @@
 <?php
-    /*/
-     * Project Name:    Wingman — Helix — Method
+    /**
+     * Project Name:    Wingman Helix - Method
      * Created by:      Angel Politis
      * Creation Date:   Feb 16 2026
-     * Last Modified:   Feb 19 2026
-    /*/
+     * Last Modified:   Mar 17 2026
+     *
+     * Copyright (c) 2026-2026 Angel Politis <info@angelpolitis.com>
+     * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+     * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+     */
 
     # Use the Helix namespace.
     namespace Wingman\Helix;
@@ -95,6 +99,14 @@
             $term = new MethodMatchesSignatureTerm();
             $term->setContext($this);
             $this->addTerm($term);
+        }
+
+        /**
+         * Deep-copies the parameters list in addition to what the parent clone handler covers.
+         */
+        public function __clone () : void {
+            parent::__clone();
+            $this->parameters = array_map(fn (Parameter $param) : Parameter => clone $param, $this->parameters);
         }
 
         /**
@@ -339,7 +351,7 @@
         public function waive (string ...$propertyNames) : static {
             foreach ($propertyNames as $propertyName) {
                 if (in_array($propertyName, static::$waivableProperties, true)) {
-                    $this->$propertyName = null;
+                    $this->$propertyName = $propertyName === "parameters" ? [] : null;
                 }
             }
             return $this;

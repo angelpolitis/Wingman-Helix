@@ -1,10 +1,14 @@
 <?php
-    /*/
-     * Project Name:    Wingman — Helix — Member
+    /**
+     * Project Name:    Wingman Helix - Member
      * Created by:      Angel Politis
      * Creation Date:   Feb 16 2026
-     * Last Modified:   Feb 16 2026
-    /*/
+     * Last Modified:   Mar 17 2026
+     *
+     * Copyright (c) 2026-2026 Angel Politis <info@angelpolitis.com>
+     * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+     * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+     */
 
     # Use the Helix namespace.
     namespace Wingman\Helix;
@@ -53,6 +57,19 @@
             $this->name = $name;
             $this->type = $type;
             $this->terms = [];
+        }
+
+        /**
+         * Deep-copies the term list and re-binds each cloned term's context to this instance.
+         * Also clears the contract binding, as the clone is not yet associated with any contract.
+         */
+        public function __clone () : void {
+            $this->contract = null;
+            $this->terms = array_map(function (ContractTerm $term) : ContractTerm {
+                $cloned = clone $term;
+                $cloned->setContext($this);
+                return $cloned;
+            }, $this->terms);
         }
 
         /**

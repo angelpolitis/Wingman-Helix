@@ -1,10 +1,14 @@
 <?php
-    /*/
-     * Project Name:    Wingman — Helix — Parameter
+    /**
+     * Project Name:    Wingman Helix - Parameter
      * Created by:      Angel Politis
      * Creation Date:   Feb 16 2026
-     * Last Modified:   Feb 17 2026
-    /*/
+     * Last Modified:   Mar 17 2026
+     *
+     * Copyright (c) 2026-2026 Angel Politis <info@angelpolitis.com>
+     * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+     * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+     */
 
     # Use the Helix namespace.
     namespace Wingman\Helix;
@@ -20,7 +24,7 @@
          * A special marker value used to indicate that a parameter characteristic should be waived during contract evaluation.
          * @var string
          */
-        private const string UNSET = "[`[`[`[`[`[__HELIX_UNSET__]`]`]`]`]`]";
+        private const string UNSET = "\x00__HELIX_UNSET__\x00";
 
         /**
          * A list of parameter names that can be waived during contract evaluation.
@@ -307,9 +311,8 @@
          */
         public function waive (string ...$propertyNames) : static {
             foreach ($propertyNames as $propertyName) {
-                if (in_array($propertyName, static::$waivableProperties, true)) {
-                    $this->$propertyName = null;
-                }
+                if (!in_array($propertyName, static::$waivableProperties, true)) continue;
+                $this->$propertyName = $propertyName === "defaultValue" ? self::UNSET : null;
             }
             return $this;
         }
