@@ -1,16 +1,21 @@
 <?php
-    /*/
-     * Project Name:    Wingman — Helix — Contract
+    /**
+     * Project Name:    Wingman Helix - Contract
      * Created by:      Angel Politis
      * Creation Date:   Feb 16 2026
-     * Last Modified:   Feb 19 2026
-    /*/
+     * Last Modified:   Mar 17 2026
+     *
+     * Copyright (c) 2026-2026 Angel Politis <info@angelpolitis.com>
+     * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+     * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+     */
 
     # Use the Helix namespace.
     namespace Wingman\Helix;
 
     # Import the following classes to the current scope.
     use InvalidArgumentException;
+    use Wingman\Helix\Enums\AccessModifier;
     use Wingman\Helix\Exceptions\ContractViolationException;
 
     /**
@@ -67,7 +72,7 @@
          * @param string|Constant $nameOrObj The name or instance of the constant.
          * @return Constant The created constant member for chaining.
          */
-        public function forConstant (string|Constant $nameOrObj) : Constant {
+        public function defineConstant (string|Constant $nameOrObj) : Constant {
             $constant = $this->members[] = $nameOrObj instanceof Constant ? clone $nameOrObj : new Constant($nameOrObj);
             $constant->bindToContract($this);
             return $constant;
@@ -78,7 +83,7 @@
          * @param string|Method $nameOrObj The name or instance of the method.
          * @return Method The created method member for chaining.
          */
-        public function forMethod (string|Method $nameOrObj) : Method {
+        public function defineMethod (string|Method $nameOrObj) : Method {
             $method = $this->members[] = $nameOrObj instanceof Method ? clone $nameOrObj : new Method($nameOrObj);
             $method->bindToContract($this);
             return $method;
@@ -89,7 +94,7 @@
          * @param string|Property $nameOrObj The name or instance of the property.
          * @return Property The created property member for chaining.
          */
-        public function forProperty (string|Property $nameOrObj) : Property {
+        public function defineProperty (string|Property $nameOrObj) : Property {
             $property = $this->members[] = $nameOrObj instanceof Property ? clone $nameOrObj : new Property($nameOrObj);
             $property->bindToContract($this);
             return $property;
@@ -106,39 +111,59 @@
                 throw new InvalidArgumentException("Interface '$interface' does not exist.");
             }
 
-            $reflection = Inspector::getClassReflection($interface);
+            $reflection = Inspector::getInstance()->getClassReflection($interface);
             $contract = new static($interface);
 
-            foreach ($reflection->getConstants() as $name => $value) {
-                $contract->forConstant($name)
-                    ->expectValue($value)
+            foreach ($reflection->getReflectionConstants() as $refConst) {
+                $modifier = match (true) {
+                    $refConst->isProtected() => AccessModifier::Protected,
+                    $refConst->isPrivate() => AccessModifier::Private,
+                    default => AccessModifier::Public,
+                };
+
+                $contract->defineConstant($refConst->getName())
+                    ->expectValue($refConst->getValue())
+                    ->expectAccessModifier($modifier)
                     ->require();
             }
 
             foreach ($reflection->getMethods() as $method) {
-                $m = $contract->forMethod($method->getName())->require();
+                $m = $contract->defineMethod($method->getName())
+                    ->expectAccessModifier(AccessModifier::Public)
+                    ->require();
 
                 if ($method->hasReturnType()) {
                     $m->expectReturnType(TypeComparator::stringifyType($method->getReturnType()));
                 }
-                
+
                 foreach ($method->getParameters() as $param) {
                     $p = new Parameter(
-                        $param->getName(),
-                        $param->hasType() ? TypeComparator::stringifyType($param->getType()) : null,
-                        $param->isOptional(),
-                        $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null,
-                        $param->isVariadic(),
-                        $param->isPassedByReference()
+                        name: $param->getName(),
+                        type: $param->hasType() ? TypeComparator::stringifyType($param->getType()) : null,
+                        optional: $param->isOptional(),
+                        passedByReference: $param->isPassedByReference(),
+                        variadic: $param->isVariadic()
                     );
+
+                    if ($param->isDefaultValueAvailable()) {
+                        $p->expectDefaultValue($param->getDefaultValue());
+                    }
 
                     $m->expectParameter($p);
                 }
             }
 
             foreach ($reflection->getProperties() as $property) {
-                $p = $contract->forProperty($property->getName())->require();
-                
+                $actualModifier = match (true) {
+                    $property->isProtected() => AccessModifier::Protected,
+                    $property->isPrivate() => AccessModifier::Private,
+                    default => AccessModifier::Public,
+                };
+
+                $p = $contract->defineProperty($property->getName())
+                    ->expectAccessModifier($actualModifier)
+                    ->require();
+
                 if ($property->hasType()) {
                     $p->expectType(TypeComparator::stringifyType($property->getType()));
                 }
@@ -206,7 +231,7 @@
             }
             if (!empty($errors)) {
                 if (is_object($objOrClass)) {
-                    $ref = Inspector::getClassReflection($objOrClass);
+                    $ref = Inspector::getInstance()->getClassReflection($objOrClass);
 
                     if ($ref->isAnonymous()) {
                         $file = $ref->getFileName();
