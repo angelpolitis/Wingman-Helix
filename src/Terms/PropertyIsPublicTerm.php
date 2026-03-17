@@ -1,10 +1,14 @@
 <?php
-    /*/
-     * Project Name:    Wingman — Helix — Property Is Public Term
+    /**
+     * Project Name:    Wingman Helix - Property Is Public Term
      * Created by:      Angel Politis
      * Creation Date:   Feb 16 2026
-     * Last Modified:   Feb 17 2026
-    /*/
+     * Last Modified:   Mar 17 2026
+     *
+     * Copyright (c) 2026-2026 Angel Politis <info@angelpolitis.com>
+     * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+     * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+     */
 
     # Use the Helix namespace.
     namespace Wingman\Helix\Terms;
@@ -15,7 +19,7 @@
 
     /**
      * Checks that a property is public.
-     * @package Wingman\Helix
+     * @package Wingman\Helix\Terms
      * @author Angel Politis <info@angelpolitis.com>
      * @since 1.0
      */
@@ -30,7 +34,7 @@
                 return false;
             }
 
-            return Inspector::getPropertyReflection($objOrClass, $this->property->getName())->isPublic();
+            return Inspector::getInstance()->getPropertyReflection($objOrClass, $this->property->getName())->isPublic();
         }
 
         /**

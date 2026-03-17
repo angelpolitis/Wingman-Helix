@@ -1,10 +1,14 @@
 <?php
-    /*/
-     * Project Name:    Wingman — Helix — Property Matches Signature Term
+    /**
+     * Project Name:    Wingman Helix - Property Matches Signature Term
      * Created by:      Angel Politis
      * Creation Date:   Feb 17 2026
-     * Last Modified:   Feb 17 2026
-    /*/
+     * Last Modified:   Mar 17 2026
+     *
+     * Copyright (c) 2026-2026 Angel Politis <info@angelpolitis.com>
+     * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+     * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+     */
 
     # Use the Helix.Terms namespace.
     namespace Wingman\Helix\Terms;
@@ -26,7 +30,7 @@
          * Indicates whether the property has been defined on the target class or object.
          * @var bool
          */
-        protected bool $propertyDefined;
+        protected bool $propertyDefined = false;
 
         /**
          * Evaluates whether the property signature on the target matches the blueprint.
@@ -45,7 +49,7 @@
 
             $this->propertyDefined = true;
 
-            $reflection = Inspector::getPropertyReflection($objOrClass, $blueprint);
+            $reflection = Inspector::getInstance()->getPropertyReflection($objOrClass, $blueprint);
 
             # 2. Access Modifier Check.
             if (($expectedModifier = $blueprint->getAccessModifier()) !== null) {

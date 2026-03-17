@@ -1,10 +1,14 @@
 <?php
-    /*/
-     * Project Name:    Wingman — Helix — Method Return Value Term
+    /**
+     * Project Name:    Wingman Helix - Method Return Value Term
      * Created by:      Angel Politis
      * Creation Date:   Feb 16 2026
-     * Last Modified:   Feb 17 2026
-    /*/
+     * Last Modified:   Mar 17 2026
+     *
+     * Copyright (c) 2026-2026 Angel Politis <info@angelpolitis.com>
+     * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+     * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+     */
 
     # Use the Helix.Terms namespace.
     namespace Wingman\Helix\Terms;
@@ -40,12 +44,10 @@
 
         /**
          * Creates a new term.
-         * @param string $methodName The name of the method to check.
          * @param string|null $type The expected return type for the method.
          * @param Contract|null $contract An optional nested contract to validate the return type against.
          */
-        public function __construct (string $methodName, ?string $type = null, ?Contract $contract = null) {
-            parent::__construct($methodName);
+        public function __construct (?string $type = null, ?Contract $contract = null) {
             $this->type = $type;
             $this->contract = $contract;
         }
@@ -83,7 +85,7 @@
                 return false;
             }
 
-            $reflection = Inspector::getMethodReflection($objOrClass, $this->method);
+            $reflection = Inspector::getInstance()->getMethodReflection($objOrClass, $this->method);
             
             # 1. If we don't care about the type or nested contract, this term is satisfied.
             if ($this->type === null && $this->contract === null) {
@@ -113,7 +115,7 @@
                 foreach ($typesToValidate as $className) {
                     # Skip built-in types like 'string', 'int' for nested contracts.
                     if (class_exists($className) || interface_exists($className)) {
-                        if (!Inspector::complies($className, $this->contract)) {
+                        if (!Inspector::getInstance()->complies($className, $this->contract)) {
                             return false;
                         }
                     }

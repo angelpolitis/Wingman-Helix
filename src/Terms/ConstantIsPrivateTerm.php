@@ -1,10 +1,14 @@
 <?php
-    /*/
-     * Project Name:    Wingman — Helix — Constant Is Private Term
+    /**
+     * Project Name:    Wingman Helix - Constant Is Private Term
      * Created by:      Angel Politis
      * Creation Date:   Feb 16 2026
-     * Last Modified:   Feb 17 2026
-    /*/
+     * Last Modified:   Mar 17 2026
+     *
+     * Copyright (c) 2026-2026 Angel Politis <info@angelpolitis.com>
+     * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+     * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+     */
 
     # Use the Helix.Terms namespace.
     namespace Wingman\Helix\Terms;
@@ -26,7 +30,7 @@
          * @return bool Whether the constant is private.
          */
         public function evaluate (object|string $objOrClass) : bool {
-            $constant = Inspector::getClassReflection($objOrClass)->getReflectionConstant($this->constant->getName());
+            $constant = Inspector::getInstance()->getClassReflection($objOrClass)->getReflectionConstant($this->constant->getName());
 
             if (!($constant instanceof ReflectionClassConstant)) {
                 return false;

@@ -1,10 +1,14 @@
 <?php
-    /*/
-     * Project Name:    Wingman — Helix — Method Matches Signature Term
+    /**
+     * Project Name:    Wingman Helix - Method Matches Signature Term
      * Created by:      Angel Politis
      * Creation Date:   Feb 16 2026
-     * Last Modified:   Feb 17 2026
-    /*/
+     * Last Modified:   Mar 17 2026
+     *
+     * Copyright (c) 2026-2026 Angel Politis <info@angelpolitis.com>
+     * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+     * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+     */
 
     # Use the Helix.Terms namespace.
     namespace Wingman\Helix\Terms;
@@ -28,7 +32,7 @@
          * Indicates whether the method has been defined on the target class or object.
          * @var bool
          */
-        protected bool $methodDefined;
+        protected bool $methodDefined = false;
         
         /**
          * Checks that the parameters of a method match the expected signature.
@@ -93,7 +97,7 @@
 
             $this->methodDefined = true;
 
-            $reflection = Inspector::getMethodReflection($objOrClass, $blueprint);
+            $reflection = Inspector::getInstance()->getMethodReflection($objOrClass, $blueprint);
 
             if (($expectedModifier = $blueprint->getAccessModifier()) !== null) {
                 $actual = match(true) {

@@ -1,10 +1,14 @@
 <?php
-    /*/
-     * Project Name:    Wingman — Helix — Constant Has Type Term
+    /**
+     * Project Name:    Wingman Helix - Constant Has Type Term
      * Created by:      Angel Politis
      * Creation Date:   Feb 16 2026
-     * Last Modified:   Feb 17 2026
-    /*/
+     * Last Modified:   Mar 17 2026
+     *
+     * Copyright (c) 2026-2026 Angel Politis <info@angelpolitis.com>
+     * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+     * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+     */
 
     # Use the Helix.Terms namespace.
     namespace Wingman\Helix\Terms;
@@ -43,7 +47,7 @@
             if (!Constant::exists($objOrClass, $this->constant->getName())) {
                 return false;
             }
-            $reflection = Inspector::getConstantReflection($objOrClass, $this->constant);
+            $reflection = Inspector::getInstance()->getConstantReflection($objOrClass, $this->constant);
             if ($this->type === "") {
                 return $reflection->hasType();
             }

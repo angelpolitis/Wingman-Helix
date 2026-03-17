@@ -1,10 +1,14 @@
 <?php
-    /*/
-     * Project Name:    Wingman — Helix — Constant Matches Signature Term
+    /**
+     * Project Name:    Wingman Helix - Constant Matches Signature Term
      * Created by:      Angel Politis
      * Creation Date:   Feb 17 2026
-     * Last Modified:   Feb 17 2026
-    /*/
+     * Last Modified:   Mar 17 2026
+     *
+     * Copyright (c) 2026-2026 Angel Politis <info@angelpolitis.com>
+     * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+     * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+     */
 
     # Use the Helix.Terms namespace.
     namespace Wingman\Helix\Terms;
@@ -26,7 +30,7 @@
          * Indicates whether the constant has been defined on the target class or object.
          * @var bool
          */
-        protected bool $constantDefined;
+        protected bool $constantDefined = false;
 
         /**
          * Evaluates whether the constant signature on the target matches the blueprint.
@@ -45,7 +49,7 @@
 
             $this->constantDefined = true;
 
-            $reflection = Inspector::getConstantReflection($objOrClass, $name);
+            $reflection = Inspector::getInstance()->getConstantReflection($objOrClass, $name);
 
             # 2. Access Modifier Check
             if (($expectedMod = $blueprint->getAccessModifier()) !== null) {

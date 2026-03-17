@@ -1,10 +1,14 @@
 <?php
-    /*/
-     * Project Name:    Wingman — Helix — Constant Has Attribute Term
+    /**
+     * Project Name:    Wingman Helix - Constant Has Attribute Term
      * Created by:      Angel Politis
      * Creation Date:   Feb 16 2026
-     * Last Modified:   Feb 17 2026
-    /*/
+     * Last Modified:   Mar 17 2026
+     *
+     * Copyright (c) 2026-2026 Angel Politis <info@angelpolitis.com>
+     * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+     * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+     */
 
     # Use the Helix.Terms namespace.
     namespace Wingman\Helix\Terms;
@@ -40,14 +44,34 @@
          * @return bool Whether the constant has the attribute.
          */
         public function evaluate (object|string $objOrClass) : bool {
-            $reflection = Inspector::getClassReflection($objOrClass);
+            $reflection = Inspector::getInstance()->getClassReflection($objOrClass);
             $constant = $reflection->getReflectionConstant($this->constant->getName());
 
             if (!($constant instanceof ReflectionClassConstant)) {
                 return false;
             }
 
-            return !empty($constant->getAttributes($this->attribute));
+            $attributes = $constant->getAttributes($this->attribute);
+
+            if (empty($attributes)) {
+                return false;
+            }
+
+            $attributeValue = $this->args[0] ?? null;
+
+            if ($attributeValue === null) {
+                return true;
+            }
+
+            foreach ($attributes as $attribute) {
+                $arguments = $attribute->getArguments();
+
+                if (in_array($attributeValue, $arguments, true) || $arguments === $attributeValue) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /**
@@ -55,7 +79,13 @@
          * @return string The error message.
          */
         public function getErrorMessage () : string {
-            return "Constant '{$this->constant->getName()}' does not have the required attribute '{$this->attribute}'.";
+            $baseMessage = "Constant '{$this->constant->getName()}' does not have the required attribute '{$this->attribute}'";
+
+            if (isset($this->args[0])) {
+                return "{$baseMessage} with value '{$this->args[0]}'.";
+            }
+
+            return "{$baseMessage}.";
         }
     }
 ?>
